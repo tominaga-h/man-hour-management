@@ -27,6 +27,8 @@ function generateManagementSheet() {
   const targetMonth = 1;
   const sheetName = `${targetYear}年${targetMonth}月工数管理`;
   const headerBg = "#efefef";
+  const issueTotalBg = "#d3e2ed";
+  const totalBg = "#dbe9d6";
   const sapp = SpreadsheetApp;
   const ss = sapp.getActiveSpreadsheet();
 
@@ -49,8 +51,8 @@ function generateManagementSheet() {
     1: 500, // A列
     2: 100, // B列
     3: 100, // C列
-    4: 100, // D列
-    5: 100, // E列
+    4: 110, // D列
+    5: 110, // E列
   };
 
   for (const [col, width] of Object.entries(columnWidths)) {
@@ -59,18 +61,19 @@ function generateManagementSheet() {
 
   // --- プロジェクト別集計 ---
   // 集計ヘッダー
-  let headerRange = _getHeaderRange(1); // A1:E1
+  let range = _getHeaderRange(1); // A1:E1
   sheet
-    .getRange(headerRange)
+    .getRange(range)
     .setValues([["プロジェクト別集計", "", "", "", ""]])
     .merge()
     .setBackground(headerBg)
     .setFontWeight("bold");
   // 項目ヘッダー
-  headerRange = _getHeaderRange(2); // A2:E2
+  range = _getHeaderRange(2); // A2:E2
   sheet
-    .getRange(headerRange)
+    .getRange(range)
     .setValues([["プロジェクト", "保守工数", "稼働実績", "残工数", ""]])
+    .setHorizontalAlignment("center")
     .setFontWeight("bold");
 
   // プロジェクトの取得
@@ -85,6 +88,50 @@ function generateManagementSheet() {
 
   // プロジェクト毎の表示
   for (const project of projects) {
+    // プロジェクトヘッダー
+    range = _getHeaderRange(row);
+    sheet
+      .getRange(range)
+      .setValues([[project, "", "", "", ""]])
+      .merge()
+      .setBackground(headerBg)
+      .setFontWeight("bold");
+    row++; // 1行追加
 
+    // 課題ヘッダー
+    range = _getHeaderRange(row);
+    sheet
+      .getRange(range)
+      .setValues([
+        ["課題", "担当者", "工程", "予定工数(時間)", "稼働実績(時間)"],
+      ])
+      .setFontWeight("bold")
+      .setHorizontalAlignment("center");
+		row++;
+
+    // 3回課題のテンプレートを作成
+    for (const _ of [1, 2, 3]) {
+      row++;
+      row++;
+      row++; // 3行空ける
+
+      // 課題合計セル
+      range = _getHeaderRange(row);
+      sheet
+        .getRange(range)
+        .setValues([["課題合計", "", "", "", ""]])
+        .setBackground(issueTotalBg);
+      row++;
+    }
+
+    // 総合計セル
+    range = _getHeaderRange(row);
+    sheet
+      .getRange(range)
+      .setValues([["総合計", "", "", "", ""]])
+      .setFontWeight("bold")
+      .setBackground(totalBg);
+    row++;
+    row++; // 1行空ける
   }
 }
