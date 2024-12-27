@@ -1,0 +1,10 @@
+{
+  "name": "man-hour-management",
+  "version": "1.0.0",
+  "description": "稼働工数管理のGoogle Apps Scriptを管理するリポジトリ",
+  "main": "index.gs",
+  "scripts": {},
+  "dependencies": {
+    "@types/google-apps-script": "^1.0.89"
+  }
+}
