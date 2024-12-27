@@ -23,9 +23,7 @@ function _getDaysInMonth(year, month) {
 }
 
 function _getDateRange(sheet, row, dateStartCol, daysInMonth) {
-	return sheet.getRange(
-		row, dateStartCol, 1, daysInMonth
-	);
+  return sheet.getRange(row, dateStartCol, 1, daysInMonth);
 }
 
 /**
@@ -99,7 +97,7 @@ function generateManagementSheet() {
   range = _getHeaderRange(2); // A2:E2
   sheet
     .getRange(range)
-    .setValues([["プロジェクト", "保守工数", "稼働実績", "残工数", ""]])
+    .setValues([["プロジェクト", "保守工数", "稼働実績(保守内)", "残工数", "稼働実績(保守外)"]])
     .setHorizontalAlignment("center")
     .setFontWeight("bold");
 
@@ -137,30 +135,43 @@ function generateManagementSheet() {
     row++;
 
     // 日付の表示
-    const dateHeaderRange = _getDateRange(sheet, row - 2, dateStartCol, daysInMonth);
-    const dayHeaderRange = _getDateRange(sheet, row - 1, dateStartCol, daysInMonth);
+    const dateHeaderRange = _getDateRange(
+      sheet,
+      row - 2,
+      dateStartCol,
+      daysInMonth
+    );
+    const dayHeaderRange = _getDateRange(
+      sheet,
+      row - 1,
+      dateStartCol,
+      daysInMonth
+    );
     dateHeaderRange
-			.setValues([dateHeaders])
-			.setBackgrounds([dateBgs])
-			.setHorizontalAlignment("center");
+      .setValues([dateHeaders])
+      .setBackgrounds([dateBgs])
+      .setHorizontalAlignment("center");
     dayHeaderRange
-			.setValues([dayHeaders])
-			.setBackgrounds([dateBgs])
-			.setHorizontalAlignment("center");
+      .setValues([dayHeaders])
+      .setBackgrounds([dateBgs])
+      .setHorizontalAlignment("center");
 
     for (let d = 1; d <= daysInMonth; d++) {
-      sheet.setColumnWidth(dateStartCol-1 + d, 45); // 日付の列幅設定
+      sheet.setColumnWidth(dateStartCol - 1 + d, 45); // 日付の列幅設定
     }
 
     // 3回課題のテンプレートを作成
     for (const _ of [1, 2, 3]) {
-			_getDateRange(sheet, row, dateStartCol, daysInMonth).setBackgrounds([dateBgs]);
+      _getDateRange(sheet, row, dateStartCol, daysInMonth).setBackgrounds([ dateBgs ]);
+      sheet.getRange(`E${row}`).setFormula(`=SUM(F${row}:AJ${row})`);
       row++;
-			_getDateRange(sheet, row, dateStartCol, daysInMonth).setBackgrounds([dateBgs]);
+      _getDateRange(sheet, row, dateStartCol, daysInMonth).setBackgrounds([ dateBgs ]);
+      sheet.getRange(`E${row}`).setFormula(`=SUM(F${row}:AJ${row})`);
       row++;
-			_getDateRange(sheet, row, dateStartCol, daysInMonth).setBackgrounds([dateBgs]);
+      _getDateRange(sheet, row, dateStartCol, daysInMonth).setBackgrounds([ dateBgs ]);
+      sheet.getRange(`E${row}`).setFormula(`=SUM(F${row}:AJ${row})`);
       row++; // 3行空ける
-			_getDateRange(sheet, row, dateStartCol, daysInMonth).setBackgrounds([dateBgs]);
+      _getDateRange(sheet, row, dateStartCol, daysInMonth).setBackgrounds([ dateBgs ]);
 
       // 課題合計セル
       range = _getHeaderRange(row);
@@ -169,7 +180,7 @@ function generateManagementSheet() {
         .setValues([["課題合計", "", "", "", ""]])
         .setBackground(issueTotalBg);
       row++;
-			_getDateRange(sheet, row, dateStartCol, daysInMonth).setBackgrounds([dateBgs]);
+      _getDateRange(sheet, row, dateStartCol, daysInMonth).setBackgrounds([ dateBgs ]);
     }
 
     // 総合計セル
@@ -179,7 +190,7 @@ function generateManagementSheet() {
       .setValues([["総合計", "", "", "", ""]])
       .setFontWeight("bold")
       .setBackground(totalBg);
-		_getDateRange(sheet, row, dateStartCol, daysInMonth).setBackgrounds([dateBgs]);
+    _getDateRange(sheet, row, dateStartCol, daysInMonth).setBackgrounds([ dateBgs ]);
     row++;
     row++; // 1行空ける
   }
