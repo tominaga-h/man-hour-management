@@ -18,6 +18,16 @@ function _getProjects() {
     .filter((p) => p);
 }
 
+function _getDaysInMonth(year, month) {
+  return new Date(year, month, 0).getDate();
+}
+
+function _getDateRange(sheet, row, dateStartCol, daysInMonth) {
+	return sheet.getRange(
+		row, dateStartCol, 1, daysInMonth
+	);
+}
+
 /**
  * 稼働工数管理シートの生成
  */
@@ -25,10 +35,17 @@ function generateManagementSheet() {
   // 変数初期化
   const targetYear = 2025;
   const targetMonth = 1;
+  const dateStartCol = 6;
+  const daysInMonth = _getDaysInMonth(targetYear, targetMonth);
   const sheetName = `${targetYear}年${targetMonth}月工数管理`;
+  const weekdayLabels = ["日", "月", "火", "水", "木", "金", "土"];
+  const dateHeaders = [];
+  const dayHeaders = [];
+  const dateBgs = [];
   const headerBg = "#efefef";
   const issueTotalBg = "#d3e2ed";
   const totalBg = "#dbe9d6";
+  const weekendBg = "#df9b99";
   const sapp = SpreadsheetApp;
   const ss = sapp.getActiveSpreadsheet();
 
@@ -57,6 +74,16 @@ function generateManagementSheet() {
 
   for (const [col, width] of Object.entries(columnWidths)) {
     sheet.setColumnWidth(Number(col), width);
+  }
+
+  // 日付データ準備
+  for (let d = 1; d <= daysInMonth; d++) {
+    const current = new Date(targetYear, targetMonth - 1, d, 12, 0, 0);
+    const dayOfWeek = current.getDay();
+    const wLabel = weekdayLabels[dayOfWeek];
+    dateHeaders.push(`${d}`);
+    dayHeaders.push(wLabel);
+    dateBgs.push(dayOfWeek === 0 || dayOfWeek === 6 ? weekendBg : null);
   }
 
   // --- プロジェクト別集計 ---
@@ -107,13 +134,33 @@ function generateManagementSheet() {
       ])
       .setFontWeight("bold")
       .setHorizontalAlignment("center");
-		row++;
+    row++;
+
+    // 日付の表示
+    const dateHeaderRange = _getDateRange(sheet, row - 2, dateStartCol, daysInMonth);
+    const dayHeaderRange = _getDateRange(sheet, row - 1, dateStartCol, daysInMonth);
+    dateHeaderRange
+			.setValues([dateHeaders])
+			.setBackgrounds([dateBgs])
+			.setHorizontalAlignment("center");
+    dayHeaderRange
+			.setValues([dayHeaders])
+			.setBackgrounds([dateBgs])
+			.setHorizontalAlignment("center");
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      sheet.setColumnWidth(dateStartCol-1 + d, 45); // 日付の列幅設定
+    }
 
     // 3回課題のテンプレートを作成
     for (const _ of [1, 2, 3]) {
+			_getDateRange(sheet, row, dateStartCol, daysInMonth).setBackgrounds([dateBgs]);
       row++;
+			_getDateRange(sheet, row, dateStartCol, daysInMonth).setBackgrounds([dateBgs]);
       row++;
+			_getDateRange(sheet, row, dateStartCol, daysInMonth).setBackgrounds([dateBgs]);
       row++; // 3行空ける
+			_getDateRange(sheet, row, dateStartCol, daysInMonth).setBackgrounds([dateBgs]);
 
       // 課題合計セル
       range = _getHeaderRange(row);
@@ -122,6 +169,7 @@ function generateManagementSheet() {
         .setValues([["課題合計", "", "", "", ""]])
         .setBackground(issueTotalBg);
       row++;
+			_getDateRange(sheet, row, dateStartCol, daysInMonth).setBackgrounds([dateBgs]);
     }
 
     // 総合計セル
@@ -131,6 +179,7 @@ function generateManagementSheet() {
       .setValues([["総合計", "", "", "", ""]])
       .setFontWeight("bold")
       .setBackground(totalBg);
+		_getDateRange(sheet, row, dateStartCol, daysInMonth).setBackgrounds([dateBgs]);
     row++;
     row++; // 1行空ける
   }
